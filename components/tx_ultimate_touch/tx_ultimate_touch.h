@@ -12,18 +12,18 @@ namespace esphome
 {
     namespace tx_ultimate_touch
     {
-        const static uint8_t TOUCH_STATE_RELEASE = 1;
-        const static uint8_t TOUCH_STATE_PRESS = 2;
-        const static uint8_t TOUCH_STATE_SWIPE = 3;
+        const static uint8_t TOUCH_STATE_RELEASE = 0x01;
+        const static uint8_t TOUCH_STATE_PRESS = 0x02;
+        const static uint8_t TOUCH_STATE_SWIPE = 0x03;
 
-        const static uint8_t TOUCH_STATE_ALL_FIELDS = 11;
+        const static uint8_t TOUCH_STATE_ALL_FIELDS = 0x0B;
 
-        const static uint8_t TOUCH_STATE_SWIPE_RIGHT = 12;
-        const static uint8_t TOUCH_STATE_SWIPE_LEFT = 13;
+        const static uint8_t TOUCH_STATE_SWIPE_RIGHT = 0x0C;
+        const static uint8_t TOUCH_STATE_SWIPE_LEFT = 0x0D;
 
         struct TouchPoint
         {
-            int8_t x = -1;
+            int8_t pos = -1;
             int8_t state = -1;
         };
 
@@ -47,13 +47,15 @@ namespace esphome
             void dump_config() override;
 
         protected:
-            void send_touch_(TouchPoint tp);
-            void handle_touch(int bytes[]);
+            uint8_t read_pos_{0};
+            uint8_t frame_size_{0};
+            uint8_t frame_end_pos_{0};
+            //uint8_t read_buffer_[0xFF]{0};
+            uint8_t read_buffer_[64]{0};
 
-            TouchPoint get_touch_point(int bytes[]);
-            bool is_valid_data(int bytes[]);
-            int get_x_touch_position(int bytes[]);
-            int get_touch_state(int bytes[]);
+            void handle_packet();
+
+            TouchPoint get_touch_point(int state, int pos);
 
             Trigger<TouchPoint> touch_trigger_;
             Trigger<TouchPoint> release_trigger_;
